@@ -33,10 +33,10 @@ export function ChatSidebar({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-sidebar-border">
+      <div className="p-4 border-b border-sidebar-border/50">
         <Button
           onClick={onNewSession}
-          className="w-full justify-start gap-2"
+          className="w-full justify-start gap-2 futuristic-button neon-glow"
           data-testid="button-new-chat"
         >
           <Plus className="h-4 w-4" />
@@ -44,11 +44,11 @@ export function ChatSidebar({
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 px-2 py-3">
+      <ScrollArea className="flex-1 px-2 py-3 custom-scrollbar">
         <div className="space-y-1">
           {sessions.length === 0 ? (
             <div className="px-3 py-8 text-center text-muted-foreground">
-              <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50 float-animation" />
               <p className="text-sm">No chat history</p>
               <p className="text-xs mt-1">Start a new conversation</p>
             </div>
@@ -57,15 +57,22 @@ export function ChatSidebar({
               <div
                 key={session.id}
                 className={cn(
-                  "group relative flex items-start gap-3 rounded-md px-3 py-2.5 cursor-pointer hover-elevate",
-                  currentSessionId === session.id && "bg-sidebar-accent"
+                  "group relative flex items-start gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-all duration-300",
+                  "hover:bg-sidebar-accent/50 hover-border-glow",
+                  currentSessionId === session.id && "bg-sidebar-accent sidebar-item-active neon-glow"
                 )}
                 onClick={() => onSelectSession(session.id)}
                 data-testid={`button-session-${session.id}`}
               >
-                <MessageSquare className="h-4 w-4 mt-0.5 shrink-0 text-sidebar-foreground/70" />
+                <MessageSquare className={cn(
+                  "h-4 w-4 mt-0.5 shrink-0 transition-colors",
+                  currentSessionId === session.id ? "text-primary" : "text-sidebar-foreground/70"
+                )} />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate text-sidebar-foreground">
+                  <div className={cn(
+                    "text-sm font-medium truncate",
+                    currentSessionId === session.id ? "gradient-text" : "text-sidebar-foreground"
+                  )}>
                     {session.title}
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
@@ -78,7 +85,7 @@ export function ChatSidebar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hover-glow"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteSession(session.id);

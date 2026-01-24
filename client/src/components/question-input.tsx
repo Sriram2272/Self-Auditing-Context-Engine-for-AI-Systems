@@ -39,10 +39,10 @@ export function QuestionInput({
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex items-center gap-3">
         <Select value={selectedDomain} onValueChange={(v) => onDomainChange(v as Domain)}>
-          <SelectTrigger className="w-48" data-testid="select-domain">
+          <SelectTrigger className="w-48 glass-subtle hover-border-glow transition-all" data-testid="select-domain">
             <SelectValue placeholder="Select domain" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="glass-card border-0">
             {domains.map((domain) => (
               <SelectItem key={domain.value} value={domain.value} data-testid={`select-domain-${domain.value}`}>
                 {domain.label}
@@ -52,20 +52,20 @@ export function QuestionInput({
         </Select>
       </div>
 
-      <div className="relative">
+      <div className="relative animated-border animated-border-subtle rounded-lg">
         <Textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask a question... (Press Enter to submit, Shift+Enter for new line)"
-          className="min-h-[100px] pr-14 resize-none text-base"
+          className="min-h-[100px] pr-14 resize-none text-base border-0 glass-subtle input-focus-glow bg-transparent"
           disabled={isLoading}
           data-testid="input-question"
         />
         <Button
           type="submit"
           size="icon"
-          className="absolute bottom-3 right-3"
+          className="absolute bottom-3 right-3 futuristic-button neon-glow"
           disabled={!question.trim() || isLoading}
           data-testid="button-submit-question"
         >

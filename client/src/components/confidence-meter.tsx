@@ -32,13 +32,25 @@ export function ConfidenceMeter({ confidence, showLabel = true, size = "md" }: C
       {showLabel && (
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">{getConfidenceLabel()}</span>
-          <span className="font-mono font-medium">{percentage}%</span>
+          <span className="font-mono font-medium gradient-text">{percentage}%</span>
         </div>
       )}
-      <div className={cn("w-full rounded-full bg-muted overflow-hidden", heights[size])}>
+      <div className={cn("w-full rounded-full bg-muted/50 overflow-hidden relative", heights[size])}>
+        <div 
+          className="absolute inset-0 confidence-gradient opacity-30" 
+        />
         <div
-          className={cn("h-full rounded-full transition-all duration-500", getConfidenceColor())}
-          style={{ width: `${percentage}%` }}
+          className={cn(
+            "h-full rounded-full transition-all duration-700 ease-out relative",
+            "confidence-gradient",
+            percentage >= 80 && "progress-glow"
+          )}
+          style={{ 
+            width: `${percentage}%`,
+            boxShadow: percentage >= 50 
+              ? `0 0 ${percentage / 5}px hsl(var(--chart-2) / 0.5)` 
+              : undefined 
+          }}
         />
       </div>
     </div>

@@ -217,14 +217,14 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
   return (
     <SidebarProvider style={sidebarStyle}>
       <div className="flex h-screen w-full">
-        <Sidebar className="border-r border-sidebar-border">
-          <SidebarHeader className="border-b border-sidebar-border p-4">
+        <Sidebar className="border-r border-sidebar-border glass-subtle">
+          <SidebarHeader className="border-b border-sidebar-border/50 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-md bg-primary/10">
+              <div className="flex items-center justify-center w-10 h-10 rounded-md bg-primary/20 neon-glow pulse-glow">
                 <Brain className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="font-semibold text-sm">RAG + KG</h1>
+                <h1 className="font-semibold text-sm gradient-text-animated">RAG + KG</h1>
                 <p className="text-xs text-muted-foreground">Evidence-Aware QA</p>
               </div>
             </div>
@@ -241,10 +241,10 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
         </Sidebar>
 
         <div className="flex flex-col flex-1 min-w-0">
-          <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
+          <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border/50 glass-subtle">
             <div className="flex items-center gap-3">
-              <SidebarTrigger data-testid="button-sidebar-toggle" />
-              <h2 className="font-medium text-sm hidden sm:block">
+              <SidebarTrigger data-testid="button-sidebar-toggle" className="hover-glow" />
+              <h2 className="font-medium text-sm hidden sm:block gradient-text">
                 {currentSession?.title || "New Conversation"}
               </h2>
             </div>
@@ -276,12 +276,14 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                 <ScrollArea className="flex-1 p-4">
                   <div className="max-w-3xl mx-auto space-y-6">
                     {!currentSession && !askQuestionMutation.isPending && (
-                      <div className="text-center py-16">
-                        <Brain className="h-16 w-16 mx-auto mb-4 text-primary/30" />
-                        <h3 className="text-lg font-medium mb-2">
+                      <div className="text-center py-16 particle-bg">
+                        <div className="inline-block p-6 rounded-full bg-primary/10 mb-6 pulse-glow neon-glow-intense">
+                          <Brain className="h-16 w-16 text-primary float-animation" />
+                        </div>
+                        <h3 className="text-2xl font-bold mb-3 gradient-text-animated">
                           Evidence-Aware Question Answering
                         </h3>
-                        <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                        <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
                           Ask questions and get answers grounded in verifiable evidence 
                           from documents and knowledge graphs. Upload documents to build 
                           your knowledge base.

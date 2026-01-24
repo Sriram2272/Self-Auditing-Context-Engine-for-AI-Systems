@@ -17,11 +17,11 @@ function EvidenceItem({ evidence, index }: { evidence: Evidence; index: number }
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="rounded-md border border-border bg-card/50 overflow-hidden">
+      <div className="rounded-lg glass-card hover-border-glow transition-all overflow-hidden">
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full justify-between p-4 h-auto hover-elevate rounded-none"
+            className="w-full justify-between p-4 h-auto rounded-none"
             data-testid={`button-evidence-${index}`}
           >
             <div className="flex items-start gap-3 text-left">
@@ -32,11 +32,11 @@ function EvidenceItem({ evidence, index }: { evidence: Evidence; index: number }
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs border-dance">
                 {Math.round(evidence.relevanceScore * 100)}% match
               </Badge>
               {isOpen ? (
-                <ChevronUp className="h-4 w-4" />
+                <ChevronUp className="h-4 w-4 text-primary" />
               ) : (
                 <ChevronDown className="h-4 w-4" />
               )}
@@ -46,7 +46,7 @@ function EvidenceItem({ evidence, index }: { evidence: Evidence; index: number }
         <CollapsibleContent>
           <div className="px-4 pb-4 space-y-3">
             <div 
-              className="text-sm evidence-highlight rounded p-3"
+              className="text-sm evidence-highlight rounded-lg p-3"
               dangerouslySetInnerHTML={{ __html: evidence.highlightedContent }}
               data-testid={`text-evidence-content-${index}`}
             />
@@ -57,7 +57,7 @@ function EvidenceItem({ evidence, index }: { evidence: Evidence; index: number }
                   Key sentences:
                 </div>
                 {evidence.sentenceEvidence.map((se, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs">
+                  <div key={i} className="flex items-start gap-2 text-xs glass-subtle rounded p-2">
                     <div className="shrink-0 mt-0.5">
                       <ConfidenceMeter confidence={se.relevance} showLabel={false} size="sm" />
                     </div>
@@ -89,25 +89,27 @@ export function EvidencePanel({ evidence }: EvidencePanelProps) {
   }
 
   return (
-    <Card className="border-card-border" data-testid="panel-evidence">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <ExternalLink className="h-4 w-4 text-primary" />
-          Retrieved Evidence
-          <Badge variant="secondary" className="ml-auto">
-            {evidence.length} chunks
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="space-y-3">
-            {evidence.map((e, i) => (
-              <EvidenceItem key={e.chunkId} evidence={e} index={i} />
-            ))}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    <div className="animated-border animated-border-subtle" data-testid="panel-evidence">
+      <Card className="border-0 glass-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <ExternalLink className="h-4 w-4 text-primary" />
+            <span className="gradient-text">Retrieved Evidence</span>
+            <Badge variant="secondary" className="ml-auto neon-glow">
+              {evidence.length} chunks
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[400px] pr-4 custom-scrollbar">
+            <div className="space-y-3">
+              {evidence.map((e, i) => (
+                <EvidenceItem key={e.chunkId} evidence={e} index={i} />
+              ))}
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

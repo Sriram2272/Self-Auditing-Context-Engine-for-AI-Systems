@@ -263,88 +263,90 @@ export function KnowledgeGraph({ graphData, facts }: KnowledgeGraphProps) {
 
   return (
     <>
-      <Card className="border-card-border" data-testid="panel-knowledge-graph">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Network className="h-4 w-4 text-primary" />
-              Knowledge Graph
-            </CardTitle>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={handleZoomOut} data-testid="button-zoom-out">
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleZoomIn} data-testid="button-zoom-in">
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleReset} data-testid="button-reset-view">
-                <Maximize2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div
-            ref={containerRef}
-            className="relative rounded-md bg-background/50 border border-border overflow-hidden"
-            style={{ height: "400px" }}
-          >
-            <canvas
-              ref={canvasRef}
-              className="w-full h-full"
-              onClick={handleCanvasClick}
-              onMouseMove={handleCanvasMouseMove}
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              data-testid="canvas-knowledge-graph"
-            />
-            
-            <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
-              {Object.entries(NODE_COLORS).map(([type, color]) => (
-                type !== "default" && (
-                  <Badge
-                    key={type}
-                    variant="outline"
-                    className="text-xs capitalize"
-                    style={{ borderColor: color, color }}
-                  >
-                    {type}
-                  </Badge>
-                )
-              ))}
-            </div>
-          </div>
-
-          {facts.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Info className="h-4 w-4" />
-                Extracted Facts ({facts.length})
+      <div className="animated-border animated-border-subtle" data-testid="panel-knowledge-graph">
+        <Card className="border-0 glass-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Network className="h-4 w-4 text-primary pulse-glow" />
+                <span className="gradient-text">Knowledge Graph</span>
+              </CardTitle>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" onClick={handleZoomOut} className="hover-glow" data-testid="button-zoom-out">
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleZoomIn} className="hover-glow" data-testid="button-zoom-in">
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleReset} className="hover-glow" data-testid="button-reset-view">
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
               </div>
-              <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                {facts.slice(0, 5).map((fact, i) => (
-                  <div
-                    key={i}
-                    className="text-xs bg-muted/50 rounded p-2 flex items-center gap-2"
-                    data-testid={`text-fact-${i}`}
-                  >
-                    <Badge variant="outline" className="text-xs shrink-0">
-                      {fact.entityType}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div
+              ref={containerRef}
+              className="relative rounded-lg glass-subtle border border-primary/20 overflow-hidden neon-glow"
+              style={{ height: "400px" }}
+            >
+              <canvas
+                ref={canvasRef}
+                className="w-full h-full cursor-move"
+                onClick={handleCanvasClick}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                data-testid="canvas-knowledge-graph"
+              />
+            
+              <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+                {Object.entries(NODE_COLORS).map(([type, color]) => (
+                  type !== "default" && (
+                    <Badge
+                      key={type}
+                      variant="outline"
+                      className="text-xs capitalize glass-subtle hover-glow"
+                      style={{ borderColor: color, color }}
+                    >
+                      {type}
                     </Badge>
-                    <span className="font-medium">{fact.entity}</span>
-                    <span className="text-muted-foreground">{fact.relationship}</span>
-                    <span className="font-medium">{fact.relatedEntity}</span>
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      {Math.round(fact.confidence * 100)}%
-                    </Badge>
-                  </div>
+                  )
                 ))}
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {facts.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Info className="h-4 w-4 text-primary" />
+                  <span className="gradient-text">Extracted Facts ({facts.length})</span>
+                </div>
+                <div className="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">
+                  {facts.slice(0, 5).map((fact, i) => (
+                    <div
+                      key={i}
+                      className="text-xs glass-subtle rounded-lg p-2 flex items-center gap-2 hover-border-glow transition-all"
+                      data-testid={`text-fact-${i}`}
+                    >
+                      <Badge variant="outline" className="text-xs shrink-0 border-dance">
+                        {fact.entityType}
+                      </Badge>
+                      <span className="font-medium gradient-text">{fact.entity}</span>
+                      <span className="text-muted-foreground">{fact.relationship}</span>
+                      <span className="font-medium">{fact.relatedEntity}</span>
+                      <Badge variant="secondary" className="ml-auto text-xs neon-glow">
+                        {Math.round(fact.confidence * 100)}%
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <Dialog open={!!selectedNode} onOpenChange={() => setSelectedNode(null)}>
         <DialogContent data-testid="dialog-node-details">
