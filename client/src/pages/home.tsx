@@ -276,18 +276,35 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                 <ScrollArea className="flex-1 p-4">
                   <div className="max-w-3xl mx-auto space-y-6">
                     {!currentSession && !askQuestionMutation.isPending && (
-                      <div className="text-center py-16 particle-bg">
-                        <div className="inline-block p-6 rounded-full bg-primary/10 mb-6 pulse-glow neon-glow-intense">
-                          <Brain className="h-16 w-16 text-primary float-animation" />
+                      <div className="text-center py-12 particle-bg">
+                        <div className="relative inline-block mb-8">
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary via-chart-3 to-chart-4 rounded-full blur-xl opacity-40 animate-pulse" />
+                          <div className="relative inline-block p-8 rounded-full bg-gradient-to-br from-primary/20 to-chart-3/20 neon-glow-intense">
+                            <Brain className="h-20 w-20 text-primary float-animation" />
+                          </div>
                         </div>
-                        <h3 className="text-2xl font-bold mb-3 gradient-text-animated">
+                        <h3 className="text-3xl font-bold mb-4 gradient-text-animated">
                           Evidence-Aware Question Answering
                         </h3>
-                        <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+                        <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed mb-8">
                           Ask questions and get answers grounded in verifiable evidence 
                           from documents and knowledge graphs. Upload documents to build 
                           your knowledge base.
                         </p>
+                        <div className="flex items-center justify-center gap-6 flex-wrap">
+                          <div className="flex items-center gap-2 glass-subtle px-4 py-2 rounded-full text-sm" data-testid="text-status-rag">
+                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                            <span className="text-muted-foreground">RAG Pipeline Ready</span>
+                          </div>
+                          <div className="flex items-center gap-2 glass-subtle px-4 py-2 rounded-full text-sm" data-testid="text-status-kg">
+                            <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                            <span className="text-muted-foreground">Knowledge Graph Active</span>
+                          </div>
+                          <div className="flex items-center gap-2 glass-subtle px-4 py-2 rounded-full text-sm" data-testid="text-status-multihop">
+                            <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+                            <span className="text-muted-foreground">Multi-hop Reasoning</span>
+                          </div>
+                        </div>
                       </div>
                     )}
 
