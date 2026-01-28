@@ -1,0 +1,82 @@
+I want to add a professional, production-quality CSV (.csv) export feature to this project for a prestigious hackathon submission.
+
+This CSV will be directly evaluated by company reviewers, so accuracy, clarity, and structure are extremely important.
+
+Please implement CSV generation with the following strict requirements:
+
+========================
+CSV FILE DETAILS
+========================
+1. File name: TeamXYZ.csv (I will rename it to my exact team name before submission).
+2. File format: CSV (comma-separated values), UTF-8 encoding.
+3. The CSV file must be created inside the project directory.
+4. Each user query must append exactly ONE new row to the CSV (do not overwrite existing data).
+5. Properly handle commas, quotes, and new lines using correct CSV escaping.
+
+========================
+CSV COLUMN STRUCTURE
+========================
+The CSV must contain the following columns EXACTLY in this order:
+
+1. query_id
+2. timestamp
+3. query_text
+4. final_answer
+5. answer_summary
+6. context_used
+7. context_excluded
+8. num_contexts_used
+9. audit_explanation
+10. reasoning_type
+11. evidence_strength
+12. hallucination_risk
+13. confidence_score
+14. response_time_ms
+15. model_name
+16. version
+
+========================
+COLUMN RULES
+========================
+- query_id: unique identifier per query (example: q1, q2, q3).
+- timestamp: date and time when answer is generated (IST preferred).
+- answer_summary: one-line human-readable summary of the final answer.
+- context_used / context_excluded: semicolon-separated text values.
+- num_contexts_used: integer count of contexts used.
+- reasoning_type: one of [factual, logical, comparative].
+- evidence_strength: one of [weak, medium, strong].
+- hallucination_risk: one of [low, medium, high].
+- confidence_score: float between 0 and 1.
+- response_time_ms: total time taken to generate the answer in milliseconds.
+- model_name: name of the LLM used.
+- version: system version (example: v1.0).
+
+========================
+IMPLEMENTATION REQUIREMENTS
+========================
+- Do NOT rewrite existing logic unless necessary.
+- Keep the code clean, readable, and simple.
+- CSV generation must work:
+  a) When running locally
+  b) When running on Replit
+- Append rows safely even if the file already exists.
+
+========================
+EXPLANATION REQUIREMENTS
+========================
+After implementation, explain everything clearly in simple English, point by point:
+1. Which file was modified or added
+2. Where the CSV file is created
+3. How rows are appended
+4. How CSV formatting and escaping is handled
+5. How I can download the CSV file from Replit
+6. How I can run the project locally and generate the same CSV
+
+========================
+FINAL OUTPUT
+========================
+After completing the task, show:
+1. The exact code added
+2. One full example CSV row that would be generated
+
+This CSV must look professional, auditable, and company-ready.

@@ -5,6 +5,17 @@ import { processDocument } from "./rag-pipeline";
 import { extractKnowledgeGraph, getGraphVisualization } from "./knowledge-graph";
 import { processQuestion } from "./answer-engine";
 import { questionRequestSchema, uploadRequestSchema } from "@shared/schema";
+import {
+  appendToCSV,
+  getNextQueryId,
+  getISTTimestamp,
+  determineReasoningType,
+  determineEvidenceStrength,
+  determineHallucinationRisk,
+  generateAnswerSummary,
+  generateAuditExplanation,
+  type CSVLogEntry,
+} from "./csv-logger";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -63,6 +74,7 @@ export async function registerRoutes(
 
   // Ask a question
   app.post("/api/ask", async (req, res) => {
+    const startTime = Date.now();
     try {
       const parsed = questionRequestSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -81,6 +93,54 @@ export async function registerRoutes(
 
       // Process the question
       const { answer, graphData } = await processQuestion(question, domain, explainabilityMode);
+
+      // Calculate response time
+      const responseTimeMs = Date.now() - startTime;
+
+      // Log to CSV for hackathon evaluation
+      try {
+        const evidenceTexts = answer.evidenceChunks?.map((e) => e.content.substring(0, 100)) || [];
+        const allChunks = domain 
+          ? await storage.getChunksByDomain(domain)
+          : await storage.getAllChunks();
+        const usedChunkIds = new Set(answer.evidenceChunks?.map((e) => e.chunkId) || []);
+        const excludedContexts = allChunks
+          .filter((c) => !usedChunkIds.has(c.id))
+          .map((c) => c.content.substring(0, 50));
+
+        const csvEntry: CSVLogEntry = {
+          queryId: getNextQueryId(),
+          timestamp: getISTTimestamp(),
+          queryText: question,
+          finalAnswer: answer.answer,
+          answerSummary: generateAnswerSummary(answer.answer),
+          contextUsed: evidenceTexts,
+          contextExcluded: excludedContexts.slice(0, 5),
+          numContextsUsed: answer.evidenceChunks?.length || 0,
+          auditExplanation: generateAuditExplanation(
+            answer.evidenceChunks?.length || 0,
+            answer.confidence,
+            (answer.contradictions?.length || 0) > 0
+          ),
+          reasoningType: determineReasoningType(answer.reasoningSteps),
+          evidenceStrength: determineEvidenceStrength(
+            answer.confidence,
+            answer.evidenceChunks?.length || 0
+          ),
+          hallucinationRisk: determineHallucinationRisk(
+            answer.confidence,
+            answer.evidenceChunks?.length || 0
+          ),
+          confidenceScore: answer.confidence,
+          responseTimeMs,
+          modelName: "gpt-4.1-mini",
+          version: "v1.0",
+        };
+
+        appendToCSV(csvEntry);
+      } catch (csvError) {
+        console.error("Error logging to CSV:", csvError);
+      }
 
       // Add assistant message to session
       if (sessionId) {
