@@ -18,3 +18,17 @@ Machine Learning (ML) is a subset of artificial intelligence (AI;## Applications
 Machine learning powers many modern technologies:
 - Voice assistants (Siri, Alexa)
 ",,4,Based on 4 evidence chunk(s); confidence 37%,factual,weak,high,0.37,2983,gpt-4.1-mini,v1.0
+q20,2026-01-30 23:54:57.158 IST,What is deep learning?,"Deep learning is a subset of machine learning that uses neural networks with multiple layers to learn from data. It is part of machine learning, which itself is a subset of artificial intelligence. [Types of Machine Learning; KG]
+
+In deep learning, key architectures include Convolutional Neural Networks (CNNs), which are particularly effective for image recognition and computer vision tasks. [Types of Machine Learning]
+
+Geoffrey Hinton, Yann LeCun, and Yoshua Bengio are recognized as pioneers of deep learning and received the Turing Award in 2018 for their contributions. [Applications]",Deep learning is a subset of machine learning that uses neural networks with multiple layers to l...,"- Autoencoders for feature learning ### Reinforcement Learning Reinforcement learning trains agents ;## Types of Machine Learning
+
+### Supervised Learning
+Supervised learning uses labeled training data;## Applications
+
+Machine learning powers many modern technologies:
+- Voice assistants (Siri, Alexa)
+;# Introduction to Machine Learning
+
+Machine Learning (ML) is a subset of artificial intelligence (AI",,4,Based on 4 evidence chunk(s); confidence 35%,factual,weak,high,0.35,1621,gpt-4.1-mini,v1.0

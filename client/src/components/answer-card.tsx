@@ -1,6 +1,9 @@
-import { AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, CheckCircle, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ConfidenceMeter } from "./confidence-meter";
 import type { AnswerResponse } from "@shared/schema";
 
@@ -9,6 +12,10 @@ interface AnswerCardProps {
 }
 
 export function AnswerCard({ answer }: AnswerCardProps) {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const answerLength = answer.answer.length;
+  const isLongAnswer = answerLength > 500;
+
   return (
     <div className="animated-border animated-border-glow" data-testid="card-answer">
       <Card className="border-0 glass-card overflow-visible">
@@ -46,9 +53,40 @@ export function AnswerCard({ answer }: AnswerCardProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            <p className="text-foreground leading-relaxed whitespace-pre-wrap" data-testid="text-answer">
-              {answer.answer}
-            </p>
+            {isLongAnswer ? (
+              <div className="space-y-2">
+                <ScrollArea className={isExpanded ? "max-h-[400px]" : "max-h-[150px]"}>
+                  <div 
+                    className="text-foreground leading-relaxed whitespace-pre-wrap pr-4" 
+                    data-testid="text-answer"
+                  >
+                    {answer.answer}
+                  </div>
+                </ScrollArea>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="w-full flex items-center gap-1"
+                  data-testid="button-expand-answer"
+                >
+                  {isExpanded ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      Show Full Answer
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <p className="text-foreground leading-relaxed whitespace-pre-wrap" data-testid="text-answer">
+                {answer.answer}
+              </p>
+            )}
           </div>
 
           <ConfidenceMeter confidence={answer.confidence} />

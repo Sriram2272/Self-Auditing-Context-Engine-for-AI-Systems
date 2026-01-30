@@ -1,11 +1,28 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Brain, Settings, FileText, ToggleLeft, ToggleRight, Download } from "lucide-react";
+import { Brain, Settings, FileText, ToggleLeft, ToggleRight, Download, User, Mail, LogOut, ChevronDown, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
@@ -39,12 +56,20 @@ export default function Home() {
   const [explainabilityMode, setExplainabilityMode] = useState(false);
   const [currentAnswer, setCurrentAnswer] = useState<AnswerResponse | null>(null);
   const [graphData, setGraphData] = useState<GraphVisualization>({ nodes: [], edges: [] });
+  const [showDocuments, setShowDocuments] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [userEmail, setUserEmail] = useState("user@example.com");
+  const [userName, setUserName] = useState("User");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery<ChatSession[]>({
     queryKey: ["/api/sessions"],
+  });
+
+  const { data: documents = [] } = useQuery<{ id: string; name: string; domain: string }[]>({
+    queryKey: ["/api/documents"],
   });
 
   const currentSession = sessions.find((s) => s.id === currentSessionId);
@@ -248,7 +273,7 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                 {currentSession?.title || "New Conversation"}
               </h2>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-2">
                 <Switch
                   id="explainability"
@@ -260,6 +285,42 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                   Explainability Mode
                 </Label>
               </div>
+
+              <Dialog open={showDocuments} onOpenChange={setShowDocuments}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="icon" className="hover-glow" data-testid="button-documents">
+                    <FolderOpen className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="glass-card max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="gradient-text">Knowledge Base Documents</DialogTitle>
+                    <DialogDescription>
+                      Documents used for evidence retrieval and knowledge graph extraction
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ScrollArea className="max-h-[400px]">
+                    <div className="space-y-2">
+                      {documents.length === 0 ? (
+                        <p className="text-sm text-muted-foreground py-4 text-center">No documents uploaded yet</p>
+                      ) : (
+                        documents.map((doc) => (
+                          <div key={doc.id} className="flex items-center justify-between p-3 glass-subtle rounded-lg hover-border-glow" data-testid={`doc-item-${doc.id}`}>
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-4 w-4 text-primary" />
+                              <div>
+                                <p className="text-sm font-medium">{doc.name}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{doc.domain}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+
               <DocumentUpload onUpload={handleUploadDocument} />
               {currentAnswer && (
                 <Button variant="outline" size="icon" onClick={handleExportPDF} data-testid="button-export">
@@ -267,6 +328,82 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                 </Button>
               )}
               <ThemeToggle />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 hover-glow" data-testid="button-profile">
+                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
+                      <User className="h-3 w-3 text-white" />
+                    </div>
+                    <span className="hidden sm:inline text-sm">{userName}</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 glass-card">
+                  <DropdownMenuLabel className="gradient-text">My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <Dialog open={showSettings} onOpenChange={setShowSettings}>
+                    <DialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} data-testid="menu-settings">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Settings
+                      </DropdownMenuItem>
+                    </DialogTrigger>
+                    <DialogContent className="glass-card">
+                      <DialogHeader>
+                        <DialogTitle className="gradient-text">Account Settings</DialogTitle>
+                        <DialogDescription>
+                          Manage your profile and preferences
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Display Name</Label>
+                          <Input
+                            id="name"
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                            className="glass-subtle"
+                            data-testid="input-name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={userEmail}
+                            onChange={(e) => setUserEmail(e.target.value)}
+                            className="glass-subtle"
+                            data-testid="input-email"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button 
+                          onClick={() => {
+                            setShowSettings(false);
+                            toast({ title: "Settings saved", description: "Your preferences have been updated." });
+                          }}
+                          className="neon-glow"
+                          data-testid="button-save-settings"
+                        >
+                          Save Changes
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <DropdownMenuItem data-testid="menu-email">
+                    <Mail className="h-4 w-4 mr-2" />
+                    {userEmail}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive" data-testid="menu-logout">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
 
