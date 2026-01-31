@@ -7,6 +7,7 @@ const CSV_FILE_PATH = path.join(process.cwd(), CSV_FILE_NAME);
 const CSV_HEADERS = [
   "query_id",
   "timestamp",
+  "user_id",
   "query_text",
   "final_answer",
   "answer_summary",
@@ -26,6 +27,7 @@ const CSV_HEADERS = [
 export interface CSVLogEntry {
   queryId: string;
   timestamp: string;
+  userId?: string;
   queryText: string;
   finalAnswer: string;
   answerSummary: string;
@@ -68,31 +70,52 @@ function escapeCSVField(value: string): string {
     return "";
   }
   const stringValue = String(value);
-  if (
-    stringValue.includes(",") ||
-    stringValue.includes('"') ||
-    stringValue.includes("\n") ||
-    stringValue.includes("\r")
-  ) {
-    return `"${stringValue.replace(/"/g, '""')}"`;
+  
+  // Prevent CSV injection by escaping special characters
+  // Characters that can trigger formulas: =, +, -, @, tab, carriage return
+  let sanitized = stringValue;
+  if (sanitized.match(/^[=+\-@\t\r]/)) {
+    // Prefix with tab and single quote to prevent formula execution
+    sanitized = "\t'" + sanitized;
   }
-  return stringValue;
+  
+  if (
+    sanitized.includes(",") ||
+    sanitized.includes('"') ||
+    sanitized.includes("\n") ||
+    sanitized.includes("\r")
+  ) {
+    return `"${sanitized.replace(/"/g, '""')}"`;
+  }
+  return sanitized;
 }
 
 function ensureCSVFileExists(): void {
   if (!fs.existsSync(CSV_FILE_PATH)) {
     const headerRow = CSV_HEADERS.join(",") + "\n";
-    fs.writeFileSync(CSV_FILE_PATH, headerRow, "utf-8");
-    console.log(`Created CSV file: ${CSV_FILE_PATH}`);
+    fs.writeFileSync(CSV_FILE_PATH, headerRow, { 
+      encoding: "utf-8",
+      mode: 0o600 // Owner read/write only (restrictive permissions)
+    });
+    console.log(`Created CSV file: ${CSV_FILE_PATH} with restrictive permissions (0600)`);
   }
 }
 
 export function appendToCSV(entry: CSVLogEntry): void {
+  // Check if CSV logging is enabled (default: true)
+  const csvLoggingEnabled = process.env.ENABLE_CSV_LOGGING !== "false";
+  
+  if (!csvLoggingEnabled) {
+    console.log(`CSV logging disabled, skipping query ${entry.queryId}`);
+    return;
+  }
+  
   ensureCSVFileExists();
 
   const row = [
     escapeCSVField(entry.queryId),
     escapeCSVField(entry.timestamp),
+    escapeCSVField(entry.userId || "anonymous"),
     escapeCSVField(entry.queryText),
     escapeCSVField(entry.finalAnswer),
     escapeCSVField(entry.answerSummary),

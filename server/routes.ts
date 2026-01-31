@@ -16,13 +16,19 @@ import {
   generateAuditExplanation,
   type CSVLogEntry,
 } from "./csv-logger";
+import { authenticateUser, type AuthRequest } from "./middleware/auth";
+import { generalRateLimiter, askRateLimiter, uploadRateLimiter } from "./middleware/rate-limit";
+import { sanitizeInput } from "./middleware/sanitize";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Get all chat sessions
-  app.get("/api/sessions", async (req, res) => {
+  // Apply general rate limiter to all API routes
+  app.use("/api", generalRateLimiter);
+
+  // Get all chat sessions (protected)
+  app.get("/api/sessions", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const sessions = await storage.getAllSessions();
       res.json(sessions);
@@ -32,8 +38,8 @@ export async function registerRoutes(
     }
   });
 
-  // Get a specific session
-  app.get("/api/sessions/:id", async (req, res) => {
+  // Get a specific session (protected)
+  app.get("/api/sessions/:id", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const session = await storage.getSession(req.params.id);
       if (!session) {
@@ -46,8 +52,8 @@ export async function registerRoutes(
     }
   });
 
-  // Create a new session
-  app.post("/api/sessions", async (req, res) => {
+  // Create a new session (protected)
+  app.post("/api/sessions", authenticateUser, sanitizeInput, async (req: AuthRequest, res) => {
     try {
       const { domain = "general" } = req.body;
       const session = await storage.createSession({
@@ -61,8 +67,8 @@ export async function registerRoutes(
     }
   });
 
-  // Delete a session
-  app.delete("/api/sessions/:id", async (req, res) => {
+  // Delete a session (protected)
+  app.delete("/api/sessions/:id", authenticateUser, async (req: AuthRequest, res) => {
     try {
       await storage.deleteSession(req.params.id);
       res.status(204).send();
@@ -72,8 +78,8 @@ export async function registerRoutes(
     }
   });
 
-  // Ask a question
-  app.post("/api/ask", async (req, res) => {
+  // Ask a question (protected, rate limited, sanitized)
+  app.post("/api/ask", authenticateUser, askRateLimiter, sanitizeInput, async (req: AuthRequest, res) => {
     const startTime = Date.now();
     try {
       const parsed = questionRequestSchema.safeParse(req.body);
@@ -111,6 +117,7 @@ export async function registerRoutes(
         const csvEntry: CSVLogEntry = {
           queryId: getNextQueryId(),
           timestamp: getISTTimestamp(),
+          userId: req.user?.uid,
           queryText: question,
           finalAnswer: answer.answer,
           answerSummary: generateAnswerSummary(answer.answer),
@@ -158,8 +165,8 @@ export async function registerRoutes(
     }
   });
 
-  // Get all documents
-  app.get("/api/documents", async (req, res) => {
+  // Get all documents (protected)
+  app.get("/api/documents", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const documents = await storage.getAllDocuments();
       res.json(documents);
@@ -169,8 +176,8 @@ export async function registerRoutes(
     }
   });
 
-  // Upload a document
-  app.post("/api/documents", async (req, res) => {
+  // Upload a document (protected, rate limited, sanitized)
+  app.post("/api/documents", authenticateUser, uploadRateLimiter, sanitizeInput, async (req: AuthRequest, res) => {
     try {
       const parsed = uploadRequestSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -192,8 +199,8 @@ export async function registerRoutes(
     }
   });
 
-  // Delete a document
-  app.delete("/api/documents/:id", async (req, res) => {
+  // Delete a document (protected)
+  app.delete("/api/documents/:id", authenticateUser, async (req: AuthRequest, res) => {
     try {
       await storage.deleteDocument(req.params.id);
       res.status(204).send();
@@ -203,8 +210,8 @@ export async function registerRoutes(
     }
   });
 
-  // Get knowledge graph data
-  app.get("/api/graph", async (req, res) => {
+  // Get knowledge graph data (protected)
+  app.get("/api/graph", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const graphData = await getGraphVisualization();
       res.json(graphData);

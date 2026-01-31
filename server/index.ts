@@ -1,17 +1,54 @@
 import express, { type Request, Response, NextFunction } from "express";
+import helmet from "helmet";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { loadSampleDocuments } from "./sample-documents";
+import { ensureValidEnvironment } from "./config/env-validation";
+import { initializeFirebaseAdmin } from "./firebase-admin";
 
 const app = express();
 const httpServer = createServer(app);
+
+// Validate environment variables before starting
+ensureValidEnvironment();
+
+// Initialize Firebase Admin
+initializeFirebaseAdmin();
 
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
   }
 }
+
+// Add security headers with Helmet
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: 
+          process.env.NODE_ENV === "production"
+            ? ["'self'"]
+            : ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Only allow in dev for Vite
+        styleSrc: ["'self'", "'unsafe-inline'"], // Required for inline styles
+        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        connectSrc: ["'self'", "https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"],
+        fontSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Needed for some Firebase features
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
 
 app.use(
   express.json({

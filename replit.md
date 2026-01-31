@@ -69,6 +69,20 @@ Preferred communication style: Simple, everyday language.
 - **PostgreSQL**: Connection via `DATABASE_URL` environment variable
 - **Session Storage**: connect-pg-simple for Express session persistence
 
+### Authentication & Security
+- **Firebase Authentication**: Client-side authentication with Firebase Auth
+- **Firebase Admin SDK**: Server-side token verification
+  - Requires `FIREBASE_SERVICE_ACCOUNT` environment variable in production
+  - Service account JSON should be set as a JSON string
+  - For development, can use application default credentials
+- **Security Headers**: Helmet middleware for CSP, HSTS, X-Frame-Options, etc.
+- **Rate Limiting**: 
+  - General API: 100 requests per 15 minutes per IP
+  - Question answering (/api/ask): 20 requests per 15 minutes per IP
+  - Document uploads: 10 uploads per hour per IP
+- **Input Sanitization**: Automatic trimming and XSS protection on all inputs
+- **CSV Logging**: Optional logging with `ENABLE_CSV_LOGGING` environment variable (default: true)
+
 ### Replit Integrations
 Located in `server/replit_integrations/` and `client/replit_integrations/`:
 - **Audio**: Voice chat with speech-to-text and text-to-speech capabilities
@@ -80,4 +94,65 @@ Located in `server/replit_integrations/` and `client/replit_integrations/`:
 - `drizzle-orm` / `drizzle-zod`: Database ORM and schema validation
 - `@tanstack/react-query`: Server state management
 - `zod`: Runtime type validation for API requests
+- `firebase` / `firebase-admin`: Client and server-side Firebase authentication
+- `express-rate-limit`: API rate limiting middleware
+- `helmet`: Security headers middleware
 - Radix UI primitives: Accessible component foundations
+
+## Environment Variables
+
+### Required Variables
+- `AI_INTEGRATIONS_OPENAI_API_KEY`: OpenAI API key for LLM operations
+- `AI_INTEGRATIONS_OPENAI_BASE_URL`: Base URL for OpenAI API
+- `DATABASE_URL`: PostgreSQL connection string
+
+### Required for Production
+- `FIREBASE_SERVICE_ACCOUNT`: Firebase service account JSON (as a JSON string)
+  - To obtain: Go to Firebase Console → Project Settings → Service Accounts → Generate New Private Key
+  - Format: `{"type":"service_account","project_id":"...","private_key":"...","client_email":"..."}`
+
+### Optional Variables
+- `ENABLE_CSV_LOGGING`: Enable/disable CSV query logging (default: `true`)
+- `VITE_FIREBASE_API_KEY`: Firebase web API key (client-side)
+- `NODE_ENV`: Environment mode (`development` or `production`)
+- `PORT`: Server port (default: `5000`)
+
+## Security Features
+
+### API Authentication
+All API endpoints require Firebase authentication:
+- Client sends Firebase ID token in `Authorization: Bearer <token>` header
+- Server verifies token using Firebase Admin SDK
+- Protected routes: `/api/sessions/*`, `/api/ask`, `/api/documents/*`, `/api/graph`
+
+### Rate Limiting
+Protects against abuse and DoS attacks:
+- General API calls: 100 requests per 15 minutes
+- Question answering: 20 requests per 15 minutes (LLM calls are expensive)
+- Document uploads: 10 uploads per hour
+
+### Security Headers
+- Content Security Policy (CSP) to prevent XSS attacks
+- HTTP Strict Transport Security (HSTS) for HTTPS enforcement
+- X-Content-Type-Options: nosniff
+- X-Frame-Options: DENY
+
+### Input Validation
+- Automatic input sanitization for all POST/PUT requests
+- Content length limits: 10MB for documents, 1000 chars for questions
+- CSV injection prevention in logging
+
+### Data Protection
+- CSV logs include user ID for audit trail
+- Restrictive file permissions (0600) on CSV files
+- Firebase security rules should be configured in Firebase Console
+
+## Security Best Practices
+
+1. **Never commit** `FIREBASE_SERVICE_ACCOUNT` or API keys to version control
+2. Use environment variables or secrets management for sensitive data
+3. Configure Firebase security rules in Firebase Console to restrict database access
+4. Keep dependencies up to date with `npm audit` and `npm update`
+5. Monitor rate limit violations in server logs
+6. Review CSV logs periodically for suspicious activity
+7. Use HTTPS in production (enforced by HSTS headers)
