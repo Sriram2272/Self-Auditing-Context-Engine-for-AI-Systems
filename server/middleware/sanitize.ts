@@ -1,21 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 
 /**
- * Sanitizes string by trimming whitespace and removing potential XSS vectors
+ * Sanitizes string by trimming whitespace
+ * Note: Basic sanitization only - CSP headers provide main XSS defense
  */
 function sanitizeString(value: string): string {
   if (typeof value !== "string") return value;
   
   // Trim whitespace
-  let sanitized = value.trim();
-  
-  // Remove potential script tags (basic protection, CSP is main defense)
-  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
-  
-  // Remove on* event handlers
-  sanitized = sanitized.replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "");
-  
-  return sanitized;
+  return value.trim();
 }
 
 /**
@@ -54,7 +47,7 @@ function validateContentLength(content: string, maxLength: number): boolean {
  * Input sanitization middleware
  * - Trims whitespace from string inputs
  * - Validates content length limits
- * - Sanitizes HTML/script tags from user inputs
+ * Note: Relies on CSP headers for XSS prevention rather than regex-based sanitization
  */
 export function sanitizeInput(
   req: Request,

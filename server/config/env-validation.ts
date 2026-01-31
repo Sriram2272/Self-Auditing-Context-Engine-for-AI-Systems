@@ -50,6 +50,12 @@ export function validateEnvironmentVariables(): EnvValidationResult {
           "FIREBASE_SERVICE_ACCOUNT is invalid. It must contain project_id, private_key, and client_email fields."
         );
       }
+      // Validate private key format
+      if (serviceAccount.private_key && !serviceAccount.private_key.includes("BEGIN PRIVATE KEY")) {
+        errors.push(
+          "FIREBASE_SERVICE_ACCOUNT private_key is invalid. It should be in PEM format (-----BEGIN PRIVATE KEY-----)."
+        );
+      }
     } catch (parseError) {
       errors.push(
         "FIREBASE_SERVICE_ACCOUNT is not valid JSON. It should be a JSON string containing your Firebase service account."

@@ -28,7 +28,10 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Required for Vite in dev
+        scriptSrc: 
+          process.env.NODE_ENV === "production"
+            ? ["'self'"]
+            : ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Only allow in dev for Vite
         styleSrc: ["'self'", "'unsafe-inline'"], // Required for inline styles
         imgSrc: ["'self'", "data:", "https:", "blob:"],
         connectSrc: ["'self'", "https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"],

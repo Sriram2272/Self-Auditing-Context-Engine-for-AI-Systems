@@ -75,7 +75,8 @@ function escapeCSVField(value: string): string {
   // Characters that can trigger formulas: =, +, -, @, tab, carriage return
   let sanitized = stringValue;
   if (sanitized.match(/^[=+\-@\t\r]/)) {
-    sanitized = "'" + sanitized; // Prefix with single quote to prevent formula execution
+    // Prefix with tab and single quote to prevent formula execution
+    sanitized = "\t'" + sanitized;
   }
   
   if (
