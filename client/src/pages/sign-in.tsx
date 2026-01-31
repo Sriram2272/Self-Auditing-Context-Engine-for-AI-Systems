@@ -64,7 +64,8 @@ export default function SignIn() {
           <CardContent className="space-y-4">
             <Button
               variant="outline"
-              className="w-full h-12 gap-3 hover-glow text-base"
+              size="lg"
+              className="w-full gap-3"
               onClick={handleGoogleSignIn}
               disabled={signingInWith !== null}
               data-testid="button-google-signin"
@@ -79,7 +80,8 @@ export default function SignIn() {
 
             <Button
               variant="outline"
-              className="w-full h-12 gap-3 hover-glow text-base"
+              size="lg"
+              className="w-full gap-3"
               onClick={handleMicrosoftSignIn}
               disabled={signingInWith !== null}
               data-testid="button-microsoft-signin"
@@ -102,19 +104,19 @@ export default function SignIn() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground" data-testid="feature-rag-search">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <span>RAG Search</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground" data-testid="feature-knowledge-graph">
                 <Database className="h-4 w-4 text-chart-2" />
                 <span>Knowledge Graph</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground" data-testid="feature-source-verification">
                 <Shield className="h-4 w-4 text-chart-3" />
                 <span>Source Verification</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground" data-testid="feature-multi-hop-reasoning">
                 <Zap className="h-4 w-4 text-chart-4" />
                 <span>Multi-hop Reasoning</span>
               </div>

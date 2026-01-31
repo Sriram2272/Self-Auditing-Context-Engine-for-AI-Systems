@@ -391,7 +391,7 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                               className="glass-subtle"
                               data-testid="input-name"
                             />
-                            <p className="text-xs text-muted-foreground">Managed by Google</p>
+                            <p className="text-xs text-muted-foreground">Managed by your sign-in provider</p>
                           </div>
                           <div className="space-y-2">
                             <Label>Email</Label>
@@ -401,7 +401,7 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                               className="glass-subtle"
                               data-testid="input-email"
                             />
-                            <p className="text-xs text-muted-foreground">Managed by Google</p>
+                            <p className="text-xs text-muted-foreground">Managed by your sign-in provider</p>
                           </div>
                         </div>
                         <div className="flex justify-end">
