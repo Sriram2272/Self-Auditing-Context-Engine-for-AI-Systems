@@ -139,7 +139,7 @@ export default function SignIn() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <div className="relative">
+                <div className="relative flex items-center">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -149,16 +149,14 @@ export default function SignIn() {
                     className="glass-subtle pr-10"
                     data-testid="input-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full px-3"
+                    className="absolute right-3 text-muted-foreground hover:text-foreground transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                     data-testid="button-toggle-password"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+                  </button>
                 </div>
               </div>
               <Button
