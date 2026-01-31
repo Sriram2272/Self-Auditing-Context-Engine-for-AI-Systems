@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Brain, Settings, FileText, ToggleLeft, ToggleRight, Download, User, Mail, LogOut, ChevronDown, FolderOpen } from "lucide-react";
+import { Brain, Settings, FileText, ToggleLeft, ToggleRight, Download, User, Mail, LogOut, ChevronDown, FolderOpen, Loader2 } from "lucide-react";
+import { SiGoogle } from "react-icons/si";
+import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -58,9 +60,9 @@ export default function Home() {
   const [graphData, setGraphData] = useState<GraphVisualization>({ nodes: [], edges: [] });
   const [showDocuments, setShowDocuments] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [userEmail, setUserEmail] = useState("user@example.com");
-  const [userName, setUserName] = useState("User");
+  const [signingIn, setSigningIn] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -329,81 +331,144 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
               )}
               <ThemeToggle />
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2 hover-glow" data-testid="button-profile">
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
-                      <User className="h-3 w-3 text-white" />
-                    </div>
-                    <span className="hidden sm:inline text-sm">{userName}</span>
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 glass-card">
-                  <DropdownMenuLabel className="gradient-text">My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <Dialog open={showSettings} onOpenChange={setShowSettings}>
-                    <DialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} data-testid="menu-settings">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Settings
-                      </DropdownMenuItem>
-                    </DialogTrigger>
-                    <DialogContent className="glass-card">
-                      <DialogHeader>
-                        <DialogTitle className="gradient-text">Account Settings</DialogTitle>
-                        <DialogDescription>
-                          Manage your profile and preferences
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Display Name</Label>
-                          <Input
-                            id="name"
-                            value={userName}
-                            onChange={(e) => setUserName(e.target.value)}
-                            className="glass-subtle"
-                            data-testid="input-name"
-                          />
+              {authLoading ? (
+                <Button variant="outline" disabled className="gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </Button>
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2 hover-glow" data-testid="button-profile">
+                      {user.photoURL ? (
+                        <img 
+                          src={user.photoURL} 
+                          alt={user.displayName || "User"} 
+                          className="h-6 w-6 rounded-full"
+                        />
+                      ) : (
+                        <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
+                          <User className="h-3 w-3 text-white" />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={userEmail}
-                            onChange={(e) => setUserEmail(e.target.value)}
-                            className="glass-subtle"
-                            data-testid="input-email"
-                          />
+                      )}
+                      <span className="hidden sm:inline text-sm">{user.displayName || "User"}</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 glass-card">
+                    <DropdownMenuLabel className="gradient-text">My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <Dialog open={showSettings} onOpenChange={setShowSettings}>
+                      <DialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} data-testid="menu-settings">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Settings
+                        </DropdownMenuItem>
+                      </DialogTrigger>
+                      <DialogContent className="glass-card">
+                        <DialogHeader>
+                          <DialogTitle className="gradient-text">Account Settings</DialogTitle>
+                          <DialogDescription>
+                            Manage your profile and preferences
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="flex items-center gap-4">
+                            {user.photoURL ? (
+                              <img 
+                                src={user.photoURL} 
+                                alt={user.displayName || "User"} 
+                                className="h-16 w-16 rounded-full"
+                              />
+                            ) : (
+                              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
+                                <User className="h-8 w-8 text-white" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium">{user.displayName || "User"}</p>
+                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Display Name</Label>
+                            <Input
+                              value={user.displayName || ""}
+                              disabled
+                              className="glass-subtle"
+                              data-testid="input-name"
+                            />
+                            <p className="text-xs text-muted-foreground">Managed by Google</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Email</Label>
+                            <Input
+                              value={user.email || ""}
+                              disabled
+                              className="glass-subtle"
+                              data-testid="input-email"
+                            />
+                            <p className="text-xs text-muted-foreground">Managed by Google</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <Button 
-                          onClick={() => {
-                            setShowSettings(false);
-                            toast({ title: "Settings saved", description: "Your preferences have been updated." });
-                          }}
-                          className="neon-glow"
-                          data-testid="button-save-settings"
-                        >
-                          Save Changes
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <DropdownMenuItem data-testid="menu-email">
-                    <Mail className="h-4 w-4 mr-2" />
-                    {userEmail}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive" data-testid="menu-logout">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                        <div className="flex justify-end">
+                          <Button 
+                            onClick={() => setShowSettings(false)}
+                            className="neon-glow"
+                            data-testid="button-close-settings"
+                          >
+                            Close
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <DropdownMenuItem data-testid="menu-email">
+                      <Mail className="h-4 w-4 mr-2" />
+                      {user.email}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="text-destructive cursor-pointer" 
+                      data-testid="menu-logout"
+                      onClick={async () => {
+                        try {
+                          await signOut();
+                          toast({ title: "Signed out", description: "You have been signed out successfully." });
+                        } catch (error) {
+                          toast({ title: "Error", description: "Failed to sign out.", variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="gap-2 hover-glow" 
+                  onClick={async () => {
+                    setSigningIn(true);
+                    try {
+                      await signInWithGoogle();
+                      toast({ title: "Welcome!", description: "You have signed in successfully." });
+                    } catch (error) {
+                      toast({ title: "Sign in failed", description: "Could not sign in with Google.", variant: "destructive" });
+                    } finally {
+                      setSigningIn(false);
+                    }
+                  }}
+                  disabled={signingIn}
+                  data-testid="button-sign-in"
+                >
+                  {signingIn ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <SiGoogle className="h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">Sign in with Google</span>
+                </Button>
+              )}
             </div>
           </header>
 
