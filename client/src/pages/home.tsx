@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Brain, Settings, FileText, ToggleLeft, ToggleRight, Download, User, Mail, LogOut, ChevronDown, FolderOpen, Loader2 } from "lucide-react";
-import { SiGoogle } from "react-icons/si";
+import { Brain, Settings, FileText, ToggleLeft, ToggleRight, Download, User, Mail, LogOut, ChevronDown, FolderOpen } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -60,9 +59,8 @@ export default function Home() {
   const [graphData, setGraphData] = useState<GraphVisualization>({ nodes: [], edges: [] });
   const [showDocuments, setShowDocuments] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [signingIn, setSigningIn] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -331,11 +329,7 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
               )}
               <ThemeToggle />
 
-              {authLoading ? (
-                <Button variant="outline" disabled className="gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                </Button>
-              ) : user ? (
+              {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="gap-2 hover-glow" data-testid="button-profile">
@@ -443,31 +437,6 @@ ${currentAnswer.reasoningSteps.map((s) => `${s.step}. ${s.description}`).join("\
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="gap-2 hover-glow" 
-                  onClick={async () => {
-                    setSigningIn(true);
-                    try {
-                      await signInWithGoogle();
-                      toast({ title: "Welcome!", description: "You have signed in successfully." });
-                    } catch (error) {
-                      toast({ title: "Sign in failed", description: "Could not sign in with Google.", variant: "destructive" });
-                    } finally {
-                      setSigningIn(false);
-                    }
-                  }}
-                  disabled={signingIn}
-                  data-testid="button-sign-in"
-                >
-                  {signingIn ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <SiGoogle className="h-4 w-4" />
-                  )}
-                  <span className="hidden sm:inline">Sign in with Google</span>
-                </Button>
               )}
             </div>
           </header>

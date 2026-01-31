@@ -5,12 +5,13 @@ import {
   signOut as firebaseSignOut,
   type User 
 } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { auth, googleProvider, microsoftProvider } from "@/lib/firebase";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithMicrosoft: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -38,6 +39,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithMicrosoft = async () => {
+    try {
+      await signInWithPopup(auth, microsoftProvider);
+    } catch (error) {
+      console.error("Error signing in with Microsoft:", error);
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     try {
       await firebaseSignOut(auth);
@@ -48,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithMicrosoft, signOut }}>
       {children}
     </AuthContext.Provider>
   );
